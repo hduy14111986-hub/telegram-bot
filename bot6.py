@@ -368,7 +368,6 @@ def callback_listener(call):
             del user_states[user_id]
         send_welcome(call.message)
 
-@main_bot.message_handler(func=lambda message: user_states.get(message.from_user.id) == "WAITING_BOT_TOKEN")
 def handle_bot_token_input(message):
     user_id = message.from_user.id
     token = message.text.strip()
