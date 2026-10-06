@@ -383,7 +383,7 @@ def handle_bot_token_input(message):
     except Exception:
         main_bot.reply_to(message, "❌ <b>Token không hợp lệ!</b> Kiểm tra lại từ @BotFather.")
 
-@app.route('/sepay-webhook', methods=['POST'])
+@app.route('/sepaywebhook', methods=['POST'])
 def sepay_webhook():
     data = request.json
     if not data:
