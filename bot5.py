@@ -170,6 +170,7 @@ def main_menu_keyboard():
     btn_deposit = types.InlineKeyboardButton("💰 Nạp tiền", callback_data="menu_deposit")
     btn_donate = types.InlineKeyboardButton("❤️ Donate Ủng Hộ", callback_data="menu_donate")
     btn_support = types.InlineKeyboardButton("🎛️ Hỗ trợ / Liên hệ", callback_data="menu_support")
+    btn_buy_vpn = types.InlineKeyboardButton("🌐 Mua VPN 32k", callback_data="buy_vpn_menu")
     
     markup.add(btn_profile, btn_create_bot)
     markup.add(btn_deposit, btn_donate)
