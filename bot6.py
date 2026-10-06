@@ -10,7 +10,7 @@ from telebot import types
 from google import genai
 
 # ==================== CẤU HÌNH THÔNG TIN BOT CHÍNH ====================
-BOT_TOKEN = "8712379927:AAHXLt0sfyfFXO9BZz0BV8aZJaQCGj3rMlo"
+BOT_TOKEN = "8712379927: AAG_2PdsHoTLPXY0cbycNZ7FokLw2XDmyZE"
 GEMINI_API_KEY = "AQ.Ab8RN6Iosl_724H-bXZMoVLRXQgcSsEnsTmQK8GBPQ3GELWSMw"  
 ADMIN_ID = 8909964397
 
