@@ -1,4 +1,0 @@
-pyTelegramBotAPI
-requests
-flask
-google-genai
