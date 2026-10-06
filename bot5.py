@@ -409,11 +409,17 @@ def sepay_webhook():
 @app.route('/')
 def home():
     return "Bot Server Active!", 200
+if __name__ == "__main__":
+    # Chỉ chạy polling trong một Thread riêng nếu bot thực sự cần nhận tin nhắn chat
+    # Nếu bot chỉ dùng để nhận webhook SePay, bạn có thể comment/xóa dòng thread polling này đi
+    try:
+        polling_thread = threading.Thread(target=main_bot.infinity_polling, kwargs={"skip_pending": True})
+        polling_thread.daemon = True
+        polling_thread.start()
+    except Exception as e:
+        print(f"Polling error: {e}")
 
-if __name__ == '__main__':
-    load_and_start_all_child_bots()
-    threading.Thread(target=main_bot.infinity_polling, daemon=True).start()
-    
-    # Tự động nhận PORT từ hệ thống Cloud/Hosting hoặc mặc định chạy cổng 8080 khi test máy tính
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
+    # Chạy Flask server trên cổng của Render cung cấp
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+
