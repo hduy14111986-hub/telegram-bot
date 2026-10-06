@@ -373,7 +373,7 @@ def handle_bot_token_input(message):
         main_bot.reply_to(message, "❌ <b>Token không hợp lệ hoặc đã sử dụng!</b> Vui lòng kiểm tra lại từ @BotFather và gửi lại.")
 
 # ==================== SEPAY WEBHOOK ====================
-@app.route('/sepay-webhook', methods=['POST'])
+@app.route('/sepaywebhook', methods=['POST'])
 def sepay_webhook():
     data = request.json
     if not data:
