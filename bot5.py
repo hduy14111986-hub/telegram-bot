@@ -409,17 +409,40 @@ def sepay_webhook():
 @app.route('/')
 def home():
     return "Bot Server Active!", 200
-if __name__ == "__main__":
-    # Chỉ chạy polling trong một Thread riêng nếu bot thực sự cần nhận tin nhắn chat
-    # Nếu bot chỉ dùng để nhận webhook SePay, bạn có thể comment/xóa dòng thread polling này đi
-    try:
-        polling_thread = threading.Thread(target=main_bot.infinity_polling, kwargs={"skip_pending": True})
-        polling_thread.daemon = True
-        polling_thread.start()
-    except Exception as e:
-        print(f"Polling error: {e}")
+import threading
+import time
+import requests
+import os
 
-    # Chạy Flask server trên cổng của Render cung cấp
+def self_ping():
+    app_url = os.environ.get("RENDER_EXTERNAL_URL", "https://telegram-bot-6ibw.onrender.com/")
+    while True:
+        try:
+            time.sleep(600)
+            response = requests.get(app_url)
+            print(f"Self-ping successful: {response.status_code}")
+        except Exception as e:
+            print(f"Self-ping error: {e}")
+
+if __name__ == "__main__":
+    try:
+        load_and_start_all_child_bots()
+    except Exception as e:
+        print(f"Error loading child bots: {e}")
+
+    def run_polling():
+        try:
+            main_bot.infinity_polling(skip_pending=True)
+        except Exception as e:
+            print(f"Polling error: {e}")
+
+    polling_thread = threading.Thread(target=run_polling)
+    polling_thread.daemon = True
+    polling_thread.start()
+
+    ping_thread = threading.Thread(target=self_ping)
+    ping_thread.daemon = True
+    ping_thread.start()
+
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
