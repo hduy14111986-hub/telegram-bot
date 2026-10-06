@@ -31,6 +31,8 @@ user_states = {}
 active_child_bots = {}
 
 DB_NAME = "bot_database.db"
+JSONBIN_ID = "6ac4dd81ffd51605352670a"
+JSONBIN_API_KEY = "$2a$10$Wievd.GiIjVoNG2nzf7qnuvakRGrmJFsZsp.rNbU/3C/0Y/V1edRq"
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
