@@ -20,6 +20,28 @@ ADMIN_USERNAME = "@dpvuuu"
 CREATE_BOT_FEE = 20000
 
 main_bot = telebot.TeleBot(BOT_TOKEN, parse_mode="HTML")
+@main_bot.message_handler(func=lambda message: message.text and ("tiktok.com" in message.text.lower() or "vt.tiktok.com" in message.text.lower()))
+def main_bot_tiktok_download(message):
+    url_match = re.search(r'(https?://[^\s]+)', message.text)
+    if not url_match:
+        main_bot.reply_to(message, "❌ Link TikTok không hợp lệ!")
+        return
+    
+    tiktok_url = url_match.group(1)
+    waiting_msg = main_bot.reply_to(message, "⏳ Đang gỡ logo và tải video TikTok cho bạn, vui lòng đợi chút...")
+    
+    video_link, title = get_tiktok_no_watermark_url(tiktok_url)
+    
+    if video_link:
+        try:
+            caption = f"🎬 <b>{title[:150]}...</b>\n\n✨ <i>Tải không dính logo thành công!</i>"
+            main_bot.send_video(message.chat.id, video_link, caption=caption)
+            main_bot.delete_message(message.chat.id, waiting_msg.message_id)
+        except Exception as e:
+            main_bot.edit_message_text("❌ Gửi video thất bại do dung lượng quá lớn hoặc lỗi kết nối!", message.chat.id, waiting_msg.message_id)
+    else:
+        main_bot.edit_message_text("❌ Không thể tải video này. Hãy chắc chắn link là công khai và đúng định dạng!", message.chat.id, waiting_msg.message_id)
+
 app = Flask(__name__)
 
 ai_client = genai.Client(api_key=GEMINI_API_KEY)
@@ -32,6 +54,20 @@ user_states = {}
 active_child_bots = {}
 
 DB_NAME = "bot_database.db"
+def get_tiktok_no_watermark_url(tiktok_url):
+    try:
+        api_url = f"https://www.tikwm.com/api/?url={tiktok_url}"
+        res = requests.get(api_url, timeout=10)
+        data = res.json()
+        if data.get("code") == 0:
+            video_no_wm = data["data"]["play"]
+            title = data["data"]["title"]
+            if video_no_wm.startswith("/"):
+                video_no_wm = "https://www.tikwm.com" + video_no_wm
+            return video_no_wm, title
+    except Exception as e:
+        print(f"Lỗi lấy video TikTok: {e}")
+    return None, None
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
