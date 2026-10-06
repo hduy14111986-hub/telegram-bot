@@ -4,6 +4,24 @@ import re
 import threading
 import time
 import requests
+import urllib.parse
+
+def get_tiktok_mp3(tiktok_url):
+    try:
+        # Sử dụng API công khai để lấy thông tin và link audio gốc của TikTok
+        api_url = f"https://www.tikwm.com/api/?url={urllib.parse.quote(tiktok_url)}"
+        res = requests.get(api_url).json()
+        
+        if res.get("code") == 0:
+            data = res.get("data", {})
+            # Lấy link file nhạc mp3 từ kết quả trả về
+            music_url = data.get("music") # Hoặc data.get("play") nếu muốn lấy link video
+            title = data.get("title", "TikTok Audio")
+            return music_url, title
+    except Exception as e:
+        print(f"Lỗi lấy MP3 TikTok: {e}")
+    return None, None
+
 from flask import Flask, request, jsonify
 import telebot
 from telebot import types
@@ -363,6 +381,29 @@ def handle_bot_token_input(message):
 @main_bot.message_handler(func=lambda message: user_states.get(message.from_user.id) == "WAITING_BOT_TOKEN")
 def proxy_token_handler(message):
     handle_bot_token_input(message)
+@main_bot.message_handler(func=lambda message: "tiktok.com" in message.text)
+def handle_tiktok_link(message):
+    url = message.text.strip()
+    
+    markup = types.InlineKeyboardMarkup()
+    btn_video = types.InlineKeyboardButton("📥 Tải Video", callback_data=f"dl_vid|{url}")
+    btn_mp3 = types.InlineKeyboardButton("🎵 Tải Nhạc MP3", callback_data=f"dl_mp3|{url}")
+    markup.add(btn_video, btn_mp3)
+    
+    main_bot.reply_to(message, "✨ Đã nhận link TikTok của bạn! Bạn muốn tải dạng nào?", reply_markup=markup)
+@main_bot.callback_query_handler(func=lambda call: call.data.startswith("dl_"))
+def callback_download(call):
+    action, url = call.data.split("|", 1)
+    main_bot.answer_callback_query(call.id, "Đang xử lý, vui lòng chờ chút...")
+    
+    if action == "dl_mp3":
+        main_bot.send_message(call.message.chat.id, "🎵 Đang bóc tách âm thanh MP3 từ TikTok...")
+        music_url, title = get_tiktok_mp3(url)
+        
+        if music_url:
+            main_bot.send_audio(call.message.chat.id, music_url, caption=f"🎵 {title}\n🤖 Bot đã tách nhạc thành công!")
+        else:
+            main_bot.send_message(call.message.chat.id, "❌ Không thể trích xuất nhạc từ video này. Hãy thử lại sau nhé!")
 
 @app.route('/sepaywebhook', methods=['POST'])
 def sepay_webhook():
