@@ -2,6 +2,7 @@ import os
 import sqlite3
 import re
 import threading
+import requests
 from flask import Flask, request, jsonify
 import telebot
 from telebot import types
@@ -18,7 +19,17 @@ CREATE_BOT_FEE = 20000
 
 main_bot = telebot.TeleBot(BOT_TOKEN, parse_mode="HTML")
 app = Flask(__name__)
+def self_ping():
+    time.sleep(10)
+    while True:
+        try:
+            url = "https://telegram-bot-6ibw.onrender.com"
+            requests.get(url)
+        except Exception:
+            pass
+        time.sleep(600)
 
+threading.Thread(target=self_ping, daemon=True).start()
 # Thông tin ngân hàng nhận tiền
 BANK_NAME = "TPBank"
 ACCOUNT_NO = "10005824236"
