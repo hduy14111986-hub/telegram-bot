@@ -10,7 +10,7 @@ def get_tiktok_mp3(tiktok_url):
     try:
         # Sử dụng API công khai để lấy thông tin và link audio gốc của TikTok
         api_url = f"https://www.tikwm.com/api/?url={urllib.parse.quote(tiktok_url)}"
-        res = requests.get(api_url).json()
+        res = requests.get(api_url, allow_redirects=True).json()
         
         if res.get("code") == 0:
             data = res.get("data", {})
