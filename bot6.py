@@ -413,7 +413,26 @@ def sepay_webhook():
 
     return jsonify({"status": "ignored"}), 200
 
-@app.route('/')
+@app.route('/')@app.route('/sepaywebhook', methods=['POST'])
+def sepay_webhook():
+    data = request.json
+    if not data:
+        return jsonify({"status": "error"}), 400
+    content = data.get("content", "").upper()
+    amount = int(data.get("transferAmount", 0))
+
+    m_nap = re.search(r'NAP(\d+)', content)
+    if m_nap and amount > 0:
+        uid = int(m_nap.group(1))
+        update_user_balance(uid, amount)
+        try:
+            main_bot.send_message(uid, f"<b>✅ NẠP TIỀN THÀNH CÔNG!</b>\nCộng: <code>+{amount:,}đ</code>")
+        except Exception:
+            pass
+        return jsonify({"status": "success"}), 200
+
+    return jsonify({"status": "ignored"}), 200
+
 def home():
     return "Bot Server Active with TikTok Menu Guide & AI!", 200
 
